@@ -75,10 +75,12 @@ export default function App() {
   }
 
   useEffect(function () {
+
+    const controller = new AbortController();
     async function fetchMovies () {
       try {
         setIsLoading(true);
-        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {signal : controller.signal});
         const data = await res.json();
 
         if(!res.ok) {
@@ -101,7 +103,12 @@ export default function App() {
       setMovies([]);
     }
     else {
+      handleCloseSelectedMovie();
       fetchMovies();
+    }
+
+    return function () {
+      controller.abort();
     }
   }, [query]);
 
@@ -170,12 +177,12 @@ function Search ({query, setQuery})
 {
   return (
     <input
-          className="search"
-          type="text"
-          placeholder="Search movies..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      className="search"
+      type="text"
+      placeholder="Search movies..."
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    />
   )
 }
 
@@ -319,6 +326,20 @@ function SelectedMovie({selectedMovieId, closeMovie, onAddWatchedMovie, watchedM
   }
 
   useEffect(function () {
+
+    function callback (e) {
+      if(e.code === 'Escape') {
+        closeMovie();
+      }
+    }
+
+    document.addEventListener('keydown',callback)
+    return function () {
+      document.removeEventListener('keydown', callback);
+    }
+  }, [closeMovie]);
+
+  useEffect(function () {
     async function getMovieDetails() {
       setIsLoading(true);
       const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`);
@@ -327,7 +348,18 @@ function SelectedMovie({selectedMovieId, closeMovie, onAddWatchedMovie, watchedM
       setIsLoading(false);
     }
     getMovieDetails();
-  },[selectedMovieId])
+  },[selectedMovieId]);
+
+  useEffect( function () {
+    if(!title) {
+      return;
+    }
+    document.title = `Movie | ${title}`;
+
+    return function () {
+      document.title = "usePopcorn";
+    };
+  },[title]);
 
   return (
     <div className = "details">
