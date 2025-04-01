@@ -56,15 +56,22 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [isOpen1, setIsOpen1] = useState(true);
   const [isOpen2, setIsOpen2] = useState(true);
-  const [watched, setWatched] = useState([]);
+  // const [watched, setWatched] = useState([]);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
+  const [watched, setWatched] = useState(function () {
+    const storedItem = localStorage.getItem('watched');
+    return JSON.parse(storedItem);
+  });
 
   function handleAddWatchedMovie(movie)
   {
     setWatched((watched) => [...watched, movie]);
+
+    // This is how you store some data in your browsers Local Storage
+    // localStorage.setItem('watched', JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatchedMovie(id)
@@ -73,6 +80,10 @@ export default function App() {
       return movie.imdbID !== id;
     }))
   }
+
+  useEffect(function () {
+    localStorage.setItem('watched', JSON.stringify(watched));
+  }, [watched])
 
   useEffect(function () {
 
