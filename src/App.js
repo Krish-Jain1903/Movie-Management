@@ -332,6 +332,14 @@ function SelectedMovie({selectedMovieId, closeMovie, onAddWatchedMovie, watchedM
   const {Title: title, Year: year, Poster : poster , Runtime: runtime, imdbRating, Plot: plot, Released: released, Actors: actors, Director: director, Genre: genre} = movie;
   const [userRating, setUserRating] = useState(0);
 
+  const countRef = useRef(0);
+
+  useEffect(function () {
+    if(userRating) {
+      countRef.current = countRef.current + 1;
+    }
+  }, [userRating]);
+
   const alreadyWatchedMovie = watchedMovies.filter((movie) => {
     return movie.imdbID === selectedMovieId;
   });
@@ -340,8 +348,6 @@ function SelectedMovie({selectedMovieId, closeMovie, onAddWatchedMovie, watchedM
     return movie.imdbID === selectedMovieId
   })?.userRating;
 
-
-  console.log(alreadyWatchedMovie?.userRating);
   
   function handleAdd()
   {
@@ -353,6 +359,7 @@ function SelectedMovie({selectedMovieId, closeMovie, onAddWatchedMovie, watchedM
       runtime : Number(runtime.split(" ").at(0)),
       year,
       userRating,
+      countRatingDecisions : countRef.current,
     };
 
     onAddWatchedMovie(newWatchedMovie);
