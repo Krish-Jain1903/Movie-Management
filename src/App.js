@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
 
 const tempMovieData = [
   {
@@ -53,18 +54,16 @@ arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = "f84fc31d";
 export default function App() {
-  const [movies, setMovies] = useState([]);
   const [isOpen1, setIsOpen1] = useState(true);
   const [isOpen2, setIsOpen2] = useState(true);
   // const [watched, setWatched] = useState([]);
   const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [watched, setWatched] = useState(function () {
     const storedItem = localStorage.getItem('watched');
     return JSON.parse(storedItem);
   });
+  const {movies, isLoading, isError} =  useMovies(query);
 
   function handleAddWatchedMovie(movie)
   {
@@ -84,44 +83,6 @@ export default function App() {
   useEffect(function () {
     localStorage.setItem('watched', JSON.stringify(watched));
   }, [watched])
-
-  useEffect(function () {
-
-    const controller = new AbortController();
-    async function fetchMovies () {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {signal : controller.signal});
-        const data = await res.json();
-
-        if(!res.ok) {
-          throw new Error ("Something Went Wrong while fetching the Movies");
-        }
-
-        if(data.Response === 'False') {
-          throw new Error (data.Error); 
-        }
-
-        setMovies(data.Search);
-        setIsLoading(false);
-      }
-      catch (err) {
-        setIsError(err.message);
-      }
-    }
-    
-    if (query.length < 3) {
-      setMovies([]);
-    }
-    else {
-      handleCloseSelectedMovie();
-      fetchMovies();
-    }
-
-    return function () {
-      controller.abort();
-    }
-  }, [query]);
 
   function handleSelectedMovie(id)
   {
