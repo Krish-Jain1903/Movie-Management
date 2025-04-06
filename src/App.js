@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
 import { useLocalStorageState } from "./useLocalStorageState";
+import { useCloseMoviesOnKeyPress } from "./useCloseMoviesOnKeyPress";
 
 const tempMovieData = [
   {
@@ -326,21 +327,7 @@ function SelectedMovie({
     closeMovie();
   }
 
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code === "Escape") {
-          closeMovie();
-        }
-      }
-
-      document.addEventListener("keydown", callback);
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [closeMovie]
-  );
+  useCloseMoviesOnKeyPress("Escape", closeMovie);
 
   useEffect(
     function () {
